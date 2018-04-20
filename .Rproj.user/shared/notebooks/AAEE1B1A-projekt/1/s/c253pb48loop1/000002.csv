@@ -1,0 +1,4 @@
+"0","require(ggplot2)"
+"2","Loading required package: ggplot2
+"
+"0","ggplot(dionice, aes(x=Godina, y=Prinos.iznad..OTP.indeksnog.fonda)) + geom_boxplot(aes(fill=Prinos.iznad..OTP.indeksnog.fonda))"

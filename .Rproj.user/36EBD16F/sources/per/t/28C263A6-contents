@@ -1,0 +1,329 @@
+---
+title: "Mjerenje uspješnosti investitora na financijskim tržištima"
+output: html_notebook
+---
+
+Učitavanje datasetova jednog po jednog te dodavanje godine kao stupac u svaki dataset. Spajanje svih datasetova u jedan veliki i micanje praznih redaka nastalih vjerovatno zbog moje pretvore u csv.
+Nakon toga svi stupci koji u sebi imaju postotak su pretvoreni u double broj. Znak posto je maknut te broj koji se sada nalazi u tom stupcu označava postotak. Tipa ako piše 10 to onda znači 10 posto. Kolumna koja sadrži godine je potom pretovrena u factor, tj kategorijski podatak. Takav dataset je spremljen u file dionice.Rdata te ga se lako može učitati iz memorije kasnije.
+
+```{r}
+# dionice.2009 = read.csv("podaci/mojedionice2009.csv", header = T, sep = ",")
+# dionice.2010 = read.csv("podaci/mojedionice2010.csv", header = T, sep = ",")
+# dionice.2011 = read.csv("podaci/mojedionice2011.csv", header = T, sep = ",")
+# dionice.2012 = read.csv("podaci/mojedionice2012.csv", header = T, sep = ",")
+# dionice.2013 = read.csv("podaci/mojedionice2013.csv", header = T, sep = ",")
+# dionice.2014 = read.csv("podaci/mojedionice2014.csv", header = T, sep = ",")
+# dionice.2015 = read.csv("podaci/mojedionice2015.csv", header = T, sep = ",")
+# dionice.2016 = read.csv("podaci/mojedionice2016.csv", header = T, sep = ",")
+# dionice.2017 = read.csv("podaci/mojedionice2017.csv", header = T, sep = ",")
+# 
+# dionice.2009$Godina = 2009
+# dionice.2010$Godina = 2010
+# dionice.2011$Godina = 2011
+# dionice.2012$Godina = 2012
+# dionice.2013$Godina = 2013
+# dionice.2014$Godina = 2014
+# dionice.2015$Godina = 2015
+# dionice.2016$Godina = 2016
+# dionice.2017$Godina = 2017
+
+# problem koji ovdje nastaje je taj da dionice iz 2009 imaju drugačiji naziv za otp indeks
+
+# help("colnames")
+# colnames(dionice.2010)[7]
+# colnames(dionice.2009)[7] = colnames(dionice.2010)[7]
+# dionice.2009$Prinos.iznad..OTP.indeksnog.fonda
+
+# dionice = rbind(
+#   dionice.2009,
+#   dionice.2010,
+#   dionice.2011,
+#   dionice.2012,
+#   dionice.2013,
+#   dionice.2014,
+#   dionice.2015,
+#   dionice.2016,
+#   dionice.2017
+# )
+
+# 
+# dionice = na.omit(dionice)
+# dionice
+# 
+# my_function("5.34%")
+# my_function("5,34%")
+# my_function = function(string) {
+#   s = gsub("%", "", string)
+#   s = gsub(",", ".", s)
+#   return(as.numeric(s))
+# }
+# 
+# dionice$Prinos.iznad..OTP.indeksnog.fonda = unlist(lapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, my_function))
+# dionice$Prinos = unlist(lapply(dionice$Prinos, my_function))
+# dionice$Prinos.bez.div. = unlist(lapply(dionice$Prinos.bez.div., my_function))
+# 
+# save(dionice, file = "dionice.Rdata")
+# load("dionice.Rdata")
+# 
+# head(dionice)
+# 
+# class(dionice$Prinos.iznad..OTP.indeksnog.fonda)
+# class(dionice$Godina)
+# 
+# levels(dionice$Godina)
+# head(dionice)
+# dim(dionice)
+# names(dionice)
+# 
+# dionice$Godina = as.factor(dionice$Godina)
+# levels(dionice$Godina)
+
+save(dionice, file = "dionice.Rdata")
+load("dionice.Rdata")
+
+```
+
+Deskriptivna statistika. 
+Proučavanje dobivenog dataseta.
+
+Proučavanje po godinama.
+
+Summary po svim godinama. Ne govori nam previše te je dosta teško usporedit podatke.
+```{r}
+tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Godina, summary)
+```
+
+Graf srednje vrijednosti kroz godine. Većina srednjih vrijednosti se nalazi u blagome minusu uz izuzetak 2016 kada je srednja vrijednost na skoro 8 posto u plusu. 2010 godina je pak u minusu od 8%.
+
+```{r}
+mean.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), mean)
+plot(mean.by.year)
+mean.by.year
+```
+
+
+Graf mdeijana kroz godine. Većina medijana se isto nalazi u blagome minusu no zanimljivo je da najveći medijan se ovaj put nalazi u 2012 godini. Medijan za 2012 iznosi 5.63% dok srednja vrijednost za 2012 3.1%. 2010 godina je i dalje u velikom minusu i to skoro za 9% ovaj puta.
+
+```{r}
+median.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), median)
+plot(median.by.year)
+median.by.year
+```
+
+
+Boxplotovi za svaku godinu pokazani na istom grafu.
+Vidimo da su svi negdje oko nule te počinjemo sumnjati u hipotezu da je tržište moguće pobijediti.
+Primijećujemo stršeću pozitivnu vrijednost u 2013 godini. Neko je tad naime bio 131% u plusu.
+Skrećemo pažnju na donji box u 2012 godini koji je osjetno duđi od gornjeg boxa te zato je takva negativna vrijednost te godine. Paralelno s tim možemo primijetit da je 2016 gornji box osjetno veći od donjeg boxa.
+
+```{r}
+require(ggplot2)
+ggplot(dionice, aes(x=Godina, y=Prinos.iznad..OTP.indeksnog.fonda)) + geom_boxplot(aes(fill=Prinos.iznad..OTP.indeksnog.fonda))
+```
+
+
+Sve godine gledane zajedno.
+
+Možemo pretpostaviti na temelju histograma da se stvarno radi o normalnoj distribuciji.
+
+```{r}
+hist(dionice$Prinos.iznad..OTP.indeksnog.fonda)
+```
+
+Najlošiji postotak je onaj od -84% dok je najbolji od plus 131%.
+Medijan i srednja vrijednost su jako blizu nule.
+
+```{r}
+summary(dionice$Prinos.iznad..OTP.indeksnog.fonda)
+```
+
+Interkvartilni rang iznosi 22 te vidimo gore da se nalazi između -10 i plus 10. Očekivano je da se 50 posto podataka nalazi oko nule uz ovakve medijane i srednje vrijednosti.
+Varijanca je 403. Što vjerovatno znači da podaci dosta variraju.
+```{r}
+otp = dionice$Prinos.iznad..OTP.indeksnog.fonda
+IQR(otp); var(otp)
+```
+
+Ako probamo izračunat mean ali maknemo 20 posto najmanjih i 20 posto najvećih srednja vrijednost je i dalje oko nule. Znači da stršeće vrijednosti definitivno ne utječu previše.
+
+```{r}
+mean(otp, trim=0.2)
+```
+
+
+```{r}
+median(otp)
+boxplot(otp)
+quantile(otp, probs = c(0.25, 0.5, 0.75))
+
+require(modeest)
+mfv(otp)
+
+max(otp) - min(otp)
+
+IQR(otp)
+var(otp)
+
+
+hist(otp)
+plot(otp)
+```
+
+
+```{r}
+
+
+parser = function(string) {
+  s = strsplit(as.character(string), "\\s+")[[1]][1]
+  s = gsub("[(]", "", s)
+  s = gsub("[)]", "", s)
+  return(as.numeric(s))
+}
+
+as.character(dionice$Broj.promjena[1])
+parser(dionice$Broj.promjena[1])
+
+# broj promjena
+dionice$Broj.promjena = dionice$Dionice
+dionice$Broj.promjena = unlist(lapply(dionice$Broj.promjena, parser))
+
+# test na arrayu od mediana
+# plotaj tocke koji na x osi imaju broj promjena
+# podieli grupe na 0 i ne 0 te t test napravi
+
+head(dionice)
+save(dionice, file = "dionice.Rdata")
+
+# cor je 0.1 znači oni koji mijenjaju imaju blagu prednost
+cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena)
+cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, method = "kendall")
+cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, method = "spearman")
+
+name.occurence = data.frame(table(dionice$Naziv.portfelja))
+more.than.2.times = name.occurence[name.occurence$Freq > 0, ]
+length(more.than.2.times$Freq)
+
+aggregated_otp = aggregate(dionice$Prinos.iznad..OTP.indeksnog.fonda, by=list(dionice$Naziv.portfelja), FUN=mean)
+agregated.otp.more.than.2.times = aggregated_otp[aggregated_otp$Group.1 %in% more.than.2.times$Var1, ]
+
+agregated.otp.more.than.2.times
+colnames(agregated.otp.more.than.2.times)[1] = "ID"
+agregated.otp.more.than.2.times[with(agregated.otp.more.than.2.times, order(-x)), ]
+
+colnames(more.than.2.times)[1] = "ID"
+more.than.2.times
+together = merge(agregated.otp.more.than.2.times, more.than.2.times,by="ID")
+together[with(together, order(-x)), ]
+
+
+
+more.than.2.times
+help(cor)
+
+save(together, file="best_teams.Rdata")
+
+
+```
+
+```{r}
+otp = dionice$Prinos.iznad..OTP.indeksnog.fonda
+dobit = dionice$Prinos
+
+boxplot(otp, dobit)
+
+mean(otp)
+mean(dobit)
+
+t.test(otp, dobit, alternative = "l")
+
+tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Godina, mean)
+tapply(dionice$Prinos, dionice$Godina, mean)
+
+plot(tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Godina, mean)) 
+plot(tapply(dionice$Prinos, dionice$Godina, mean))
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+otp = dionice$Prinos.iznad..OTP.indeksnog.fonda
+
+mean(otp)
+mean(otp, trim=0.2)
+
+median(otp)
+boxplot(otp)
+quantile(otp, probs = c(0.25, 0.5, 0.75))
+
+require(modeest)
+mfv(otp)
+
+max(otp) - min(otp)
+
+IQR(otp)
+
+var(otp)
+sd(otp)
+
+suppressWarnings(require(raster,quietly = TRUE))
+# koeficijent varijacije
+cv(otp)
+
+hist(otp)
+plot(otp)
+
+
+hist(otp, breaks = seq(from = min(otp) - 0.5, to = max(otp) + 0.5, length = 11))
+qqnorm(otp)
+mean_otp = mean(otp)
+sd_opt = sd(otp)
+n_opt = length(otp)
+
+# interval pouzdanosti
+
+alpha = 0.05
+t.alpha.pola = qt(1 - alpha/2, df = length(otp) - 1)
+dg = mean_otp - t.alpha.pola*sd_opt/sqrt(n_opt)
+gg = mean_otp + t.alpha.pola*sd_opt/sqrt(n_opt)
+interval = c(dg, gg)
+interval
+mean_otp
+
+t.test(otp, mu = 0, alt = "two.sided")
+
+
+# veća od 0
+t = (mean_otp - 0) / (sd_opt / sqrt(n_opt))
+pv = 1 - pt(t, df = n_opt-1)
+pv
+
+t.test(otp, mu = 0, alt="greater")
+
+#pie chart
+pie(table(dionice$Godina))
+#barplot
+barplot(table(dionice$Godina))
+
+#velika varijanca
+var(otp)
+require(TeachingDemos)
+help("sigma.test")
+sigma.test(otp, sigmasq = 400, alt="two.sided")
+
+otp_2017 = dionice[dionice$Godina == 2017, ]$Prinos.iznad..OTP.indeksnog.fonda
+otp_2009 = dionice[dionice$Godina == 2009, ]$Prinos.iznad..OTP.indeksnog.fonda
+
+# ovo def ne gleda varijance
+t.test(otp_2017, otp_2009, alt="two.sided", var.equal = TRUE)
+
+
+
+
+```
+

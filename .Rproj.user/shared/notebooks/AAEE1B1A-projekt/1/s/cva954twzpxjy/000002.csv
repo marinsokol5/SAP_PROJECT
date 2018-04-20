@@ -1,0 +1,2 @@
+"0","median.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), median)"
+"0","median.by.year"
