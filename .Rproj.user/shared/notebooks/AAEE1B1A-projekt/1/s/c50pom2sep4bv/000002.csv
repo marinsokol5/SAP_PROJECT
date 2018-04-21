@@ -1,6 +1,7 @@
-"0","cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena)
-"
+"0","cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena);"
 "1","[1]"
 "1"," 0.1022367"
 "1","
 "
+"0","# cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, method = ""kendall"")"
+"0","# cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, method = ""spearman"")"

@@ -64,5 +64,5 @@
 "0","# "
 "0","# dionice$Godina = as.factor(dionice$Godina)"
 "0","# levels(dionice$Godina)"
-"0","save(dionice, file = ""dionice.Rdata"")"
+"0","# save(dionice, file = ""dionice.Rdata"")"
 "0","load(""dionice.Rdata"")"

@@ -1,5 +1,4 @@
-"0","t.test(otp, mu=0, alternative = ""two.sided"")
-"
+"0","t.test(otp, mu=0, alternative = ""two.sided"")"
 "1","
 "
 "1","	One Sample t-test"

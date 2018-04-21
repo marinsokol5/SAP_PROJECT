@@ -101,7 +101,7 @@ Graf srednje vrijednosti kroz godine. Većina srednjih vrijednosti se nalazi u b
 
 ```{r}
 mean.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), mean)
-mean.by.year
+# mean.by.year
 plot(mean.by.year)
 ```
 
@@ -110,7 +110,7 @@ Graf mdeijana kroz godine. Većina medijana se isto nalazi u blagome minusu no z
 
 ```{r}
 median.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), median)
-median.by.year
+# median.by.year
 plot(median.by.year)
 ```
 
@@ -179,13 +179,12 @@ t.test(otp, mu=0, alternative = "two.sided")
 ```
 
 Ide li ljudima sve bolje i bolje.
-Po ovom dolje izgleda da ide pošto možemo odbaciti null hipotezu.
-Ili sam ja nešto opako grdo napravio jer mean 2017 je manji od meana 2009.
+Po ovom dolje izgleda da ide sve gore i gore jer mogu odbacit hipotezu da su iz 2009 i 2017 jednake srednje vrijednosti u korist hipoteze da im je zapravo bolje išlo 2009.
 
 ```{r}
 otp_2017 = dionice[dionice$Godina == 2017, ]$Prinos.iznad..OTP.indeksnog.fonda
 otp_2009 = dionice[dionice$Godina == 2009, ]$Prinos.iznad..OTP.indeksnog.fonda
-t.test(otp_2009, otp_2017, alt="less")
+t.test(otp_2009, otp_2017, alt="greater")
 ```
 
 
@@ -227,7 +226,7 @@ cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena);
 
 Test usporedbe srednje vrijednosti onih s 0 promjena i onih s >=1 promjenom.
 Alternativna hipoteza je ta da onima s više promjena ide bolje.
-### Radim nešto krivo kod ovog testa s 2 uzorka.
+Ne možemo odbaciti nultu hipotezu jer je p vrijednost 99%, to znači da ovi koji su mijenjali dataset više puta nisu prošli ništa bolje od onih koji nisu mijenjali.
 
 ```{r}
 nula_promjena = dionice[dionice$Broj.promjena > 0, ]$Prinos.iznad..OTP.indeksnog.fonda
@@ -263,7 +262,7 @@ starosjedioci = spojeni_otp[spojeni_otp$ID %in% more.than.2.times$Var1, ]
 length(gusteri$ID); length(starosjedioci$ID)
 ```
 
-Idemo vidjet malo proučit starosjedioce.
+Idemo malo proučit starosjedioce.
 Izgleda da nisu ništa posebno. Srednja vrijednost i medijan blago negativni opet.
 
 ```{r}
@@ -274,20 +273,30 @@ Summary
 summary(starosjedioci)
 ```
 
+Ide li starosjediocima bolje nego gušterima?
 
+Ako napravimo test s alternativnom hipotezom da starosjediocima ide bolje dobijemo p vrijednost od 13.3% i ne možemo odbaciti nultu hipotezu.
+95%-tni interval pouzdanosti je [-0.7461803  2.7013302] i sadrži nulu. Znači ima razlike među njima no ona nije dovoljno značajna da odbacimo hipotezu da su jednaki.
 
 ```{r}
-# t test na arrayu od mediana
-# plotaj tocke koji na x osi imaju broj promjena
-# starosjedioci with best of or last otp
-# mijenjaju li starosjedioci češće portfelj
-# korelacija između broja dolaska i agregated meana
-
-# together = merge(agregated.otp.more.than.2.times, more.than.2.times,by="ID")
-# together[with(together, order(-x)), ]
-# save(together, file="best_teams.Rdata")
-
+t.test(starosjedioci$otp, gusteri$otp, alternative = "greater")
 ```
+
+```{r}
+t.test(starosjedioci$otp, gusteri$otp)
+```
+
+
+
+t test na arrayu od mediana  
+plotaj tocke koji na x osi imaju broj promjena  
+starosjedioci with best of or last otp  
+mijenjaju li starosjedioci češće portfelj  
+korelacija između broja dolaska i agregated meana  
+
+
+
+
 
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
