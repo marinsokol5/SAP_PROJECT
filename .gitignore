@@ -4,3 +4,7 @@
 projekt.nb.html
 projekt.html
 *.Rdata
+*.RData
+*.Rhistory
+*.Rproj
+
