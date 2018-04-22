@@ -1,3 +1,0 @@
-"0","mean.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), mean)"
-"0","# mean.by.year"
-"0","plot(mean.by.year)"
