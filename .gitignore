@@ -8,3 +8,4 @@ projekt.html
 *.Rhistory
 *.Rproj
 
+.Rproj.user

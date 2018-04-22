@@ -178,6 +178,21 @@ Možemo zaključiti kako pojedinci generalno gube a tržište pobjeđuje.
 t.test(otp, mu=0, alternative = "two.sided")
 ```
 
+Testiranje srednje vrijednosti medijana svake godine zasebno.
+
+```{r}
+medians = tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Godina, median)
+medians
+```
+
+I ne možemo odbaciti nultu hipotezu u korist hipoteze da je medijan po godinama veći od nula. P vrijednost je 82%. Još jedan jak dokaz kako tržište pobjeđuje.
+
+```{r}
+t.test(medians, mu=0, alt="greater")
+```
+
+
+
 Ide li ljudima sve bolje i bolje.
 Po ovom dolje izgleda da ide sve gore i gore jer mogu odbacit hipotezu da su iz 2009 i 2017 jednake srednje vrijednosti u korist hipoteze da im je zapravo bolje išlo 2009.
 
@@ -213,6 +228,12 @@ dionice$Broj.promjena = dionice$Dionice
 dionice$Broj.promjena = unlist(lapply(dionice$Broj.promjena, parser))
 
 save(dionice, file = "dionice.Rdata")
+```
+
+Većina ljudi ne mijenja previše portfelj.
+
+```{r}
+hist(dionice$Broj.promjena)
 ```
 
 
@@ -294,6 +315,14 @@ Izgleda da nisu ništa posebno. Srednja vrijednost i medijan blago negativni ope
 ```{r}
 boxplot(starosjedioci$otp)
 ```
+
+Većina ljudi(ekipa) sudjeluje samo jednom.
+
+```{r}
+hist(dionice_broj_sudejlovanja$Broj.sudjelovanja)
+```
+
+
 Summary
 ```{r}
 summary(starosjedioci)
@@ -312,14 +341,62 @@ t.test(starosjedioci$otp, gusteri$otp, alternative = "greater")
 t.test(starosjedioci$otp, gusteri$otp)
 ```
 
+Možda je problem taj što smo starosjediocima uzimali srednju vrijednost njihovih pokušaja. Ajmo ić logikom da im ide sve bolje i bolje s iskustvom koje nakupljaju pa uze samo njihove zadnje pokušaje
+(možemo i najbolje koje imaju to tad već varamo navijajući za njih).
+
+```{r}
+spojeni_otp_zadnja_vrijednost = aggregate(dionice$Prinos.iznad..OTP.indeksnog.fonda, by=list(dionice$Naziv.portfelja), FUN=function(x) tail(x, n=1)[1])
+colnames(spojeni_otp_zadnja_vrijednost) = c("ID", "otp")
+
+starosjedioci_zadnja_vrijednost = spojeni_otp_zadnja_vrijednost[spojeni_otp_zadnja_vrijednost$ID %in% more.than.2.times$Var1, ]
+length(gusteri$ID); length(starosjedioci_zadnja_vrijednost$ID)
+```
+
+Nažalost ni tom im nije puno pomoglo. P vrijednost je 97% te alternativnu hipotezu da su starosjedioci bolji definitvno ne možemo shvatit ozbiljno.
+
+```{r}
+t.test(starosjedioci_zadnja_vrijednost$otp, gusteri$otp, alternative = "greater")
+```
 
 
-t test na arrayu od mediana  
-starosjedioci with best of or last otp  
-mijenjaju li starosjedioci češće portfelj  
-korelacija između broja dolaska i agregated meana  
+Ide li tim ljudima bolje kroz godine?
+Nope.
+
+```{r}
+t.test(starosjedioci_zadnja_vrijednost$otp, starosjedioci$otp, alternative = "greater")
+```
 
 
+Postoji li korelacija između broja mijenjanja portfelja i frekvencije sudjelovanja na natjecanju? 
+To jest mijenjaju li starosjedioci češće portfelj. 
+Korelacija je 0.25. Nije jaka korelacija no starosjedioci ipak malo češće mijenjaju portfelj.
+
+```{r}
+colnames(name.occurence) = c("Naziv.portfelja", "Broj.sudjelovanja")
+dionice_broj_sudejlovanja = merge(dionice, name.occurence, by="Naziv.portfelja")
+dionice_broj_sudejlovanja = dionice_broj_sudejlovanja[with(dionice_broj_sudejlovanja, order(Godina, -Prinos)), ]
+
+cor(dionice_broj_sudejlovanja$Broj.promjena, dionice_broj_sudejlovanja$Broj.sudjelovanja)
+```
+
+Šta je pak s korelacijom između broja sudjelovanja i prinosa.
+Ona je 0.049. 
+Možemo reć da ne postoji.
+
+```{r}
+cor(dionice_broj_sudejlovanja$Prinos.iznad..OTP.indeksnog.fonda, dionice_broj_sudejlovanja$Broj.sudjelovanja)
+```
+
+
+Najčešće odabrana dionica
+
+```{r}
+
+```
+
+
+parsiraj odabrane dionice pa koja je najbolja za imat
+mjesec izrade računa ovisi li o nečemu 
 
 
 
