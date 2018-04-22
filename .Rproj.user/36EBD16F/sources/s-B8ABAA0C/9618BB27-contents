@@ -224,6 +224,32 @@ cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena);
 # cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, method = "spearman")
 ```
 
+Većina ih je definitivno grupirana oko nule.
+
+```{r}
+plot(dionice$Broj.promjena, dionice$Prinos.iznad..OTP.indeksnog.fonda)
+```
+
+Ako pozovem pak summary nad njima onda vidim da broj promjena ipak utječe. Oni s 0, 1 ili 2 promjene su u većini no njihova srednja vrijednost je negativna do srednje vrijednosti svakog ostalog broja promjena >=3 su pozitivni.
+
+```{r}
+tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, summary)
+```
+
+Definitvno ide bolje onima s više promjena po ovome.
+
+```{r}
+plot(tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, mean), xlab = "Broj promjena", ylab = "Srednja vrijednost")
+```
+
+
+Ima ih nekoliko s pozitivnim medijanom također u većem brojem promjena.
+
+```{r}
+ggplot(dionice, aes(x=Broj.promjena, y=Prinos.iznad..OTP.indeksnog.fonda, group=Broj.promjena)) + geom_boxplot(aes(fill=Prinos.iznad..OTP.indeksnog.fonda))
+```
+
+
 Test usporedbe srednje vrijednosti onih s 0 promjena i onih s >=1 promjenom.
 Alternativna hipoteza je ta da onima s više promjena ide bolje.
 Ne možemo odbaciti nultu hipotezu jer je p vrijednost 99%, to znači da ovi koji su mijenjali dataset više puta nisu prošli ništa bolje od onih koji nisu mijenjali.
@@ -289,7 +315,6 @@ t.test(starosjedioci$otp, gusteri$otp)
 
 
 t test na arrayu od mediana  
-plotaj tocke koji na x osi imaju broj promjena  
 starosjedioci with best of or last otp  
 mijenjaju li starosjedioci češće portfelj  
 korelacija između broja dolaska i agregated meana  
