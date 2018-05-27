@@ -233,6 +233,7 @@ save(dionice, file = "dionice.Rdata")
 Većina ljudi ne mijenja previše portfelj.
 
 ```{r}
+
 hist(dionice$Broj.promjena)
 ```
 
@@ -391,6 +392,35 @@ cor(dionice_broj_sudejlovanja$Prinos.iznad..OTP.indeksnog.fonda, dionice_broj_su
 Najčešće odabrana dionica
 
 ```{r}
+# Prvo moramo parsirati stupac Dionice i dobiti listu stringova(factora) koji predstavljaju dionice
+
+parser = function(string) {
+  s = strsplit(as.character(string), "\\s+")[[1]][2]
+  return (unlist(strsplit(s, "[,]")))
+}
+parser(dionice$Dionice[1])
+parser(factor(dionice$Dionice[1]))
+dionice$Lista.Dionica = lapply(dionice$Dionice, parser)
+dionice$Lista.Dionica[1]
+head(dionice)
+summary(dionice$Lista.Dionica)
+
+install.packages("XML")
+install.packages("RCurl")
+install.packages("qdapTools")
+
+library(qdapTools)
+dionice[1]
+binary_dionice = cbind(dionice$RB, dionice$Naziv.portfelja, mtabulate(dionice$Lista.Dionica))
+binary_dionice
+
+help("colSums")
+# colSums(binary_dionice)
+binary_dionice[, -c(1,2)] # omitting first and second column
+binary_samo_dionice = binary_dionice[, -c(1, 2)]
+
+colSums(binary_samo_dionice)
+sort(colSums(binary_samo_dionice), decreasing = T)
 
 ```
 
