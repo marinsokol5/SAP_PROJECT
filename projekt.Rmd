@@ -1,14 +1,19 @@
 ---
 title: "Mjerenje uspješnosti investitora na financijskim tržištima"
 output:
-  html_notebook: default
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
+  html_notebook: default
 ---
 
-Učitavanje datasetova jednog po jednog te dodavanje godine kao stupac u svaki dataset. Spajanje svih datasetova u jedan veliki i micanje praznih redaka nastalih vjerovatno zbog moje pretvore u csv.
-Nakon toga svi stupci koji u sebi imaju postotak su pretvoreni u double broj. Znak posto je maknut te broj koji se sada nalazi u tom stupcu označava postotak. Tipa ako piše 10 to onda znači 10 posto. Kolumna koja sadrži godine je potom pretovrena u factor, tj kategorijski podatak. Takav dataset je spremljen u file dionice.Rdata te ga se lako može učitati iz memorije kasnije.
+Zadatak je provjeriti ispravnost hipoteze ekiasnih tržišta koja tvrdi da je nemoguće "pobijediti tržište". Varijabla promatranja je prinos u odnosu na CROBEX.
+
+Većina analize će se provoditi nad spojenim podacima od 2009. godine do 2017. godine. Njihovim spajanjem te promatranjem varijable prinos iznad CROBEXA pretpostavlja se nezavisnost između godina. Ta tvrdnja nije istinita jer će se kasnije pokazati da ima puno ekipa koje su sudjelovale kroz nekoliko godina natjecanja te samim time je njihov noviji rezultat zavisan o prethodnim pokušajima. Također, pretpostavka da su uvjeti bili jednaki svake godine je isto vrlo vjerovatno prekršena. Usprkos svemu tome, rezultat analize ne bi bio puno drugačiji da gornje tvrdnje nisu prekršene.  
+
+
+Donji kod učitava podatke iz svih datoteka te dodaje stupac koji govori o kojoj se godini radi. Miču se prazni reci te se svi stupci koji sadrže postotak pretvaraju u double. Znak posto je maknut te broj koji se sada nalazi u tom stupcu označava postotak. Tipa ako piše 10 to onda znači 10 posto.
+Kolumna koja sadrži godine je potom pretovrena u factor, tj kategorijski podatak. Takav dataset je spremljen u file dionice.Rdata te ga se lako može učitati iz memorije kasnije.
 
 ```{r}
 # dionice.2009 = read.csv("podaci/mojedionice2009.csv", header = T, sep = ",")
@@ -87,119 +92,98 @@ load("dionice.Rdata")
 
 ```
 
-# Deskriptivna statistika. 
-Proučavanje dobivenog dataseta.
+# Deskriptivna statistika.
 
-Proučavanje po godinama.
+Uspoređujući mediane i srednje vrijednosti tokom godina uočava se veliko odstupanje između samih godina te se polako naslućuje da prinos iznad CROBEXA gleano sveukupno naginje prema negativnoj vrijednosti.
 
-Summary po svim godinama. Ne govori nam previše te je dosta teško usporedit podatke.
 ```{r}
 tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Godina, summary)
 ```
 
-Graf srednje vrijednosti kroz godine. Većina srednjih vrijednosti se nalazi u blagome minusu uz izuzetak 2016 kada je srednja vrijednost na skoro 8 posto u plusu. 2010 godina je pak u minusu od 8%.
+Dole je prikazan graf srednje vrijednosti prinosa iznad CROBEXA kroz godine. Većina srednjih vrijednosti se nalazi u blagome minusu uz izuzetak 2016. godine kada je srednja vrijednost na skoro 8 posto u plusu, 2010. godina je pak u minusu od 8%.
 
 ```{r}
 mean.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), mean)
-# mean.by.year
-plot(mean.by.year)
+plot(mean.by.year, ylab="Srednja vrijednost prinosa iznad CROBEX-a", xlab="Godina")
 ```
 
+Dole je prikazan graf medijana kroz godine. Većina medijana se također nalazi u blagome minusu no zanimljivo je da se najveći medijan ovog puta nalazi u 2012. godini (najveća srednja vrijednost je bila 2016. godine). Medijan za 2012. godinu iznosi 5.63% dok srednja vrijednost za 2012. godinu iznosi 3.1%, 2010. godina je i dalje u velikom minusu i to skoro za 9% ovaj puta.
 
-Graf mdeijana kroz godine. Većina medijana se isto nalazi u blagome minusu no zanimljivo je da najveći medijan se ovaj put nalazi u 2012 godini. Medijan za 2012 iznosi 5.63% dok srednja vrijednost za 2012 3.1%. 2010 godina je i dalje u velikom minusu i to skoro za 9% ovaj puta.
 
 ```{r}
 median.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), median)
-# median.by.year
-plot(median.by.year)
+plot(median.by.year, ylab="Medijan prinosa iznad CROBEX-a", xlab="Godina")
 ```
 
+Dvije generalne tvrdnje koje se mogu konstatirati u ovom trenutku su te da je 2010. godina bila najbolja godina za tržište dok su 2012. i 2016. godina bile najgore godine za tržište.
 
-Boxplotovi za svaku godinu pokazani na istom grafu.
-Vidimo da su svi negdje oko nule te počinjemo sumnjati u hipotezu da je tržište moguće pobijediti.
-Primijećujemo stršeću pozitivnu vrijednost u 2013 godini. Neko je tad naime bio 131% u plusu.
-Skrećemo pažnju na donji box u 2012 godini koji je osjetno duđi od gornjeg boxa te zato je takva negativna vrijednost te godine. Paralelno s tim možemo primijetit da je 2016 gornji box osjetno veći od donjeg boxa.
+Dole je pak prikaz Boxplotova za svaku od godina.
+Uočava se stršeća pozitivnu vrijednost u 2013 godini. Neko je tad naime, bio 131% u plusu u prihodu iznad CROBEX indexa.
 
 ```{r}
-require(ggplot2)
-ggplot(dionice, aes(x=Godina, y=Prinos.iznad..OTP.indeksnog.fonda)) + geom_boxplot(aes(fill=Prinos.iznad..OTP.indeksnog.fonda))
+require(ggplot2, quietly = T)
+ggplot(dionice, aes(x=Godina, y=Prinos.iznad..OTP.indeksnog.fonda)) + geom_boxplot(aes(fill=Prinos.iznad..OTP.indeksnog.fonda)) +
+theme(axis.title.y = element_blank(), axis.title.x = element_blank()) +
+ggtitle("Boxplot prikaz prinosa iznad CROBEX-a po godinama")
 ```
 
 
-Sve godine gledane zajedno.
-
-Možemo pretpostaviti na temelju histograma da se stvarno radi o normalnoj distribuciji.
+Proučavanje ima li varijabla prinos iznad CROBEX-a normalnu distribucije.
+Na temelju histograma i kvantil-kvantil prikaza možemo pretpostaviti da se zaista radi o normalnoj distribuciji makar na kvantil-kvantil prikazu vidimo odstupanja u lijevom i desnom repu zbog kojih možemo posumnjati.
 
 ```{r}
-hist(dionice$Prinos.iznad..OTP.indeksnog.fonda)
+hist(dionice$Prinos.iznad..OTP.indeksnog.fonda, main=NULL, xlab = "Prihod iznad CROBEX-a", ylab = "Frekvencija")
 ```
-
-QQplot je dosta blizu pravca.
-
 ```{r}
-qqnorm(dionice$Prinos.iznad..OTP.indeksnog.fonda)
+qqnorm(dionice$Prinos.iznad..OTP.indeksnog.fonda, main="Kvantil-Kvantil prikaz prinosa iznad CROBEX-a")
+qqline(dionice$Prinos.iznad..OTP.indeksnog.fonda)
 ```
 
 
-Najlošiji postotak je onaj od -84% dok je najbolji od plus 131%.
-Medijan i srednja vrijednost su jako blizu nule.
+Medijan promatran kroz sve godine prihoda iznad CROBEX-a je -0.605 dok je srednja vrijednost -1.171. Oboje su negativni što daje naslutiti da tržište pobjeđuje.
+Najlošiji postotak ostvaren tokom svih godina je onaj od -84% dok je najbolji u plusu za 131%.
 
 ```{r}
 summary(dionice$Prinos.iznad..OTP.indeksnog.fonda)
 ```
 
-Interkvartilni rang iznosi 22 te vidimo gore da se nalazi između -10 i plus 10. Očekivano je da se 50 posto podataka nalazi oko nule uz ovakve medijane i srednje vrijednosti.
-Varijanca je 403. Što vjerovatno znači da podaci dosta variraju.
+Srednja vrijednost podrezanih najgorih 20% i najboljih 20% prihoda iznad CROBEXA također iznosi negativnu vrijednost te joj je iznos jako sličan medijanu.
+
 ```{r}
 otp = dionice$Prinos.iznad..OTP.indeksnog.fonda
-IQR(otp); var(otp)
-```
-
-Ako probamo izračunat mean ali maknemo 20 posto najmanjih i 20 posto najvećih srednja vrijednost je i dalje oko nule. Znači da stršeće vrijednosti definitivno ne utječu previše.
-
-```{r}
 mean(otp, trim=0.2)
 ```
 
-Boxplot 
+Dole se nalazi boxplot prikaz svih zajedno godina ostvarenog prihoda iznad CROBEX-a.
 
 ```{r}
-boxplot(otp)
+boxplot(otp, main="Pravokutni dijagram prihoda iznad CROBEX-a svih godina zajedno.")
 ```
 
-# Testiranje srednje vrijednosti otp-a
+# Testiranje srednje vrijednosti prihoda iznad CROBEX-a
 
-Testiramo null hipotezu da je srednja vrijednost jendaka nuli, s alternativom da nije jednaka nuli.
-Alpha je 5% a p vrijednost je 0.58% što znači da možemo odbaciti null hipotezu.
-Gledajući 95%-tni interval pouzdanosti koji ide od [-2.0, -0.33] možemo vidjet da nula definitvno nije unutra te da je srednja vrijednost otp-a populacije negativna. 
-Možemo zaključiti kako pojedinci generalno gube a tržište pobjeđuje.
+Provodi se t test s null hipotezom da je srednja vrijednost jednaka nuli, s alternativom da nije jednaka nuli.
+Koristeći pogrešku prve vrste (alphu) od 5% te na temelju dobivene p vrijednosti od 0.58% možemo odbaciti null hipotezu.
+Gledajući 95%-tni interval pouzdanosti koji ide od [-2.0, -0.33] možemo vidjet da nula definitvno nije unutra te da je srednja vrijednost prihoda populacije negativna. 
+Naslućuje se kako pojedinci generalno gube a tržište pobjeđuje.
 
 ```{r}
 t.test(otp, mu=0, alternative = "two.sided")
 ```
 
-Testiranje srednje vrijednosti medijana svake godine zasebno.
+Drugi test koji se provodi nad podacima je na medijanima prihoda iznad CROBEX-a kroz godine. 
+
+Testira se null hipozeta koja govori da je srednja vrijednost medijana jednaka nuli uz alternativnu hipotezu da je srednja vrijednost medijana različita od nule.
+Dobivena p-vrijednost je 35% te se ne može odbaciti nulta hipoteza čak ni uz osjetno veće alphe od 5%, 95-postotni interval pouzdanosti je između -5 i 2 te naginje negativnom iznosu, također srednja vrijednost medijana kroz godine je negativan broj iznosa -1.5.
+
 
 ```{r}
 medians = tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Godina, median)
 medians
 ```
 
-I ne možemo odbaciti nultu hipotezu u korist hipoteze da je medijan po godinama veći od nula. P vrijednost je 82%. Još jedan jak dokaz kako tržište pobjeđuje.
-
 ```{r}
-t.test(medians, mu=0, alt="greater")
-```
-
-
-
-Ide li ljudima sve bolje i bolje.
-Po ovom dolje izgleda da ide sve gore i gore jer mogu odbacit hipotezu da su iz 2009 i 2017 jednake srednje vrijednosti u korist hipoteze da im je zapravo bolje išlo 2009.
-
-```{r}
-otp_2017 = dionice[dionice$Godina == 2017, ]$Prinos.iznad..OTP.indeksnog.fonda
-otp_2009 = dionice[dionice$Godina == 2009, ]$Prinos.iznad..OTP.indeksnog.fonda
-t.test(otp_2009, otp_2017, alt="greater")
+t.test(medians, mu=0, alt="two.sided")
 ```
 
 
@@ -207,15 +191,15 @@ t.test(otp_2009, otp_2017, alt="greater")
 
 ```{r}
 #pie chart
-pie(table(dionice$Godina))
+pie(table(dionice$Godina), main = "Strukturni krug broja sudjelovanja po godinama")
 #barplot
-barplot(table(dionice$Godina))
+barplot(table(dionice$Godina), main = "Stupičasti dijagram broja sudjelovanja po godinama")
 ```
 
 
 # Broj promjena portfelja
 
-Parsiranje stupca s dionicama kako bi izvukli broj promjena tokom natjecanja. Taj stupac je potom dodan kao stupac Broj.promjena
+Donji kod parsira stupac s dionicama te iz njega uzima broj promjena portfelja svakog natjecatelja kojeg potom dodaje u zasebni stupac zvan Broj.promjena.
 
 ```{r}
 parser = function(string) {
@@ -227,18 +211,18 @@ parser = function(string) {
 dionice$Broj.promjena = dionice$Dionice
 dionice$Broj.promjena = unlist(lapply(dionice$Broj.promjena, parser))
 
-save(dionice, file = "dionice.Rdata")
+# save(dionice, file = "dionice.Rdata")
 ```
 
-Većina ljudi ne mijenja previše portfelj.
+Većina natjecatelja nije sklono mijenjanju portfelja te je to prikazano histogramom dolje.
 
 ```{r}
-
-hist(dionice$Broj.promjena)
+hist(dionice$Broj.promjena, main=NULL, xlab = "Broj promjena portfelja", ylab = "Frekvencija", breaks = seq(from = min(dionice$Broj.promjena) - 0.5, to = max(dionice$Broj.promjena) + 0.5, by = 1), xaxt='n')
+axis(side=1, at=seq(min(dionice$Broj.promjena), max(dionice$Broj.promjena), 1), tcl=0, col="white")
 ```
 
 
-Korelacija između stupca broj promjena i otp postotka je nažalost jako malena(pozitivna) te ne možemo tvrditi da broj promjena povećava šanse za uspjeh.
+Korelacija između stupca broj promjena i prihoda iznad CROBEX-a je jako malena(pozitivna) te ne možemo tvrditi da broj promjena povećava šanse za uspjeh.
 
 ```{r}
 cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena);
@@ -246,35 +230,81 @@ cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena);
 # cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, method = "spearman")
 ```
 
-Većina ih je definitivno grupirana oko nule.
+Dijagram raspršenja koji na x-osi ima broj promjena dok na y-osi ima prihod iznad CROBEX-a je prikazan dole.
 
 ```{r}
-plot(dionice$Broj.promjena, dionice$Prinos.iznad..OTP.indeksnog.fonda)
+plot(dionice$Broj.promjena, dionice$Prinos.iznad..OTP.indeksnog.fonda, xlab = "Broj promjena portfelja", ylab = "Prinos iznad CROBEX-a")
 ```
 
-Ako pozovem pak summary nad njima onda vidim da broj promjena ipak utječe. Oni s 0, 1 ili 2 promjene su u većini no njihova srednja vrijednost je negativna do srednje vrijednosti svakog ostalog broja promjena >=3 su pozitivni.
+Primjećuje se da su medijani i srednje vrijednosti prihoda iznad CROBEX-a gledano posebno po broju mijenjanja portfelja pretežito pozitivni brojevi.
+
 
 ```{r}
 tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, summary)
 ```
 
-Definitvno ide bolje onima s više promjena po ovome.
+Slika srednje vrijednosti po broju promjena prihoda iznad CROBEX-a otkriva zanimljivu činjenicu da je srednja vrijednost negativna samo kada je broj promjena portfelja manji od 3. 
 
 ```{r}
-plot(tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, mean), xlab = "Broj promjena", ylab = "Srednja vrijednost")
+plot(tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, mean), xlab = "Broj promjena portfelja", ylab = "Srednja vrijednost prihoda iznad CROBEX-a")
+```
+
+Ukazuje se na činjenicu da makar srednja vrijednost rasla s brojem promjena to ne znači puno jer je situacija takva da je većina podataka grupirana na malom broju promjena portfelja. Čak 87.7% sudionika je mijenjalo portfelj manje od 3 puta.
+```{r}
+tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, length)
+```
+
+Kako su velike razlike između broja promjena portfelja s puno sudionika i malo sudionika napravljena je linearna regresija koja kao izlaz gleda srednje vrijednosti prinosa iznad CROBEX-a te kao ulaz u linearnu funkciju promatra broj promjena portfelja.
+
+```{r}
+mean_broj_promjena = tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, mean)
+mean_broj_promjena_df = data.frame(mean_broj_promjena)
+sort(unique(dionice$Broj.promjena))
+mean_broj_promjena_df$Broj.promjena = sort(unique(dionice$Broj.promjena))
+names(mean_broj_promjena_df)[1] = "Mean"
+
+fit = lm(Mean~Broj.promjena, data = mean_broj_promjena_df)
+fit
+
+#cor(mean_broj_promjena_df$Mean, mean_broj_promjena_df$Broj.promjena)
+```
+
+```{r}
+plot(mean_broj_promjena_df$Broj.promjena, mean_broj_promjena_df$Mean, xlab = "Broj promjena portfelja", ylab = "Srednja vrijednost prinosa iznad CROBEX-a")
+lines(mean_broj_promjena_df$Broj.promjena, fit$fitted.values, col="red")
+```
+
+Pretpostavka linearne regresije je da reziduali dolaze iz normalne distribucije.
+Ta pretpostavka se može provjeriti pomoću kvantil kvantil prikaza te je takav prikaz dan ispod. Na njemu se naslučuje da bi reziduali mogli dolaziti iz normalne distribucije. 
+
+
+```{r}
+qqnorm(rstandard(fit), main = "Kvantil-Kvantil plot")
+qqline(rstandard(fit))
+```
+
+Statistički test za provjeru normalnosti reziduala je test Kolmogorov-Smirnov. 
+Rezultat testa je p vrijednost od čak 74.6 posto te ona govori da se nulta hipoteza (hipoteza da reziduali dolaze iz normalne distribucije) ne može odbaciti uz pogrešku prve vrste od 5 posto. 
+
+```{r}
+ks.test(rstandard(fit), 'pnorm')
+```
+
+Promatrajući p vrijednost dobivenu F-testom čija je vrijednost iznosa 1.2 posto odlučeno je da se može odbaciti nulta hipoteza koja govori da broj promjena portfelja ne ovisi o srednjoj vrijednosti prinosa iznad CROBEX-a.
+
+```{r}
+summary(fit)
 ```
 
 
-Ima ih nekoliko s pozitivnim medijanom također u većem brojem promjena.
+Boxplotovi prinosa iznad CROBEX-a po broju mijenjanja portfelja pokazani zajedno su dani dole.
 
 ```{r}
-ggplot(dionice, aes(x=Broj.promjena, y=Prinos.iznad..OTP.indeksnog.fonda, group=Broj.promjena)) + geom_boxplot(aes(fill=Prinos.iznad..OTP.indeksnog.fonda))
+ggplot(dionice, aes(x=Broj.promjena, y=Prinos.iznad..OTP.indeksnog.fonda, group=Broj.promjena)) + geom_boxplot(aes(fill=Prinos.iznad..OTP.indeksnog.fonda)) + theme(axis.title.x = element_blank(), axis.title.y = element_blank()) + ggtitle("Pravokutni dijagram prihoda iznad CROBEX-a po broju promjena portfelja")
 ```
 
-
-Test usporedbe srednje vrijednosti onih s 0 promjena i onih s >=1 promjenom.
-Alternativna hipoteza je ta da onima s više promjena ide bolje.
-Ne možemo odbaciti nultu hipotezu jer je p vrijednost 99%, to znači da ovi koji su mijenjali dataset više puta nisu prošli ništa bolje od onih koji nisu mijenjali.
+T test čija nulta hipoteza govori da je srednja vrijednost prihoda iznad CROBEX-a sudionika s nula promjena portfelja jednaka srednjoj vrijednosti onih koji imaju 1 ili više promjenu portfelja. Alternativna hipoteza je ta da onima s više promjena ide bolje.
+Rezultat testa je p vrijednost od 99.2% čime ne samo da se ne može odbaciti nulta hipoteza u korist alternativne nego je situacija takva da onima s 0 promjena ide bolje. Da je test napravljen s alternativnom hipotezom da onima s nula promjena ide bolje mogla bi se odbaciti nulta hipoteza.
 
 ```{r}
 nula_promjena = dionice[dionice$Broj.promjena > 0, ]$Prinos.iznad..OTP.indeksnog.fonda
@@ -284,7 +314,8 @@ length(nula_promjena) + length(više_od_nula_promjena) == length(otp)
 t.test(nula_promjena, više_od_nula_promjena, alternative = "less")
 ```
 
-# Ekipe koje se ponavljaju tokom godina
+# Sudionici natjecanja koji se ponavljaju tokom godina
+Pretpostavlja se da natjecatelj ulazi u natjecanje svake godine s istim imenom te da ljudi nisu radili više različitih računa kako bi sudjelovali u natjecanju. Te tvrdnje su vjerovatno prekršene.
 
 Nalazimo one čije se ime barem 2 puta ponovilo.
 ```{r}
@@ -292,15 +323,25 @@ name.occurence = data.frame(table(dionice$Naziv.portfelja))
 more.than.2.times = name.occurence[name.occurence$Freq > 1, ]
 ```
 
-U 2234 podataka ima samo 1347 jedinstevnih igrača te od tog ima 430 igrača koji su bili barem dva puta.
+U 2234 podataka ima samo 1347 jedinstevnih igrača te od tih 1347 ima 430 igrača koji su bili barem dva puta te  njih 917 koji su bili samo jednom.
 ```{r}
-length(name.occurence$Var1); length(more.than.2.times$Var1)
+length(name.occurence$Var1); length(more.than.2.times$Var1); length(name.occurence$Var1) - length(more.than.2.times$Var1);
+```
+
+Na temlju histograma broja sudjelovanja uočava se činjenica da velika većina natjecatelja sudjeluje relativno malen broj puta no čak njih 7 je sudjelovalo kroz sve godine trajanja natjecanja.
+
+```{r}
+colnames(name.occurence) = c('Naziv.portfelja', 'Broj.sudjelovanja')
+name.occurence = name.occurence[!name.occurence$Naziv.portfelja == "", ]
+table(name.occurence$Broj.sudjelovanja)
+hist(name.occurence$Broj.sudjelovanja, breaks = seq(min(name.occurence$Broj.sudjelovanja)- 0.5, max(name.occurence$Broj.sudjelovanja) + 0.5, by=1), xaxt='n', main = NULL, ylab = "Frekvencija", xlab = "Broj sudjelovanja na natjecanju")
+axis(side=1, at=seq(min(name.occurence$Broj.sudjelovanja), max(name.occurence$Broj.sudjelovanja), 1), tcl=0, col="white")
 ```
 
 ### Donosi li iskustvo prednost?
 
-Za one koji imaju više sudjelovanja, sveli smo im otp na srednju vrijednost svih pokušaja.
-Razdvojimo dataset na starosjedioce i guštere.
+Za one koji imaju više sudjelovanja je prinos iznad CROBEX-a sveden na srednju vrijednost svih njihovih sudjelovanja.
+Dole u varijabli gusteri je spremljen prinos iznad CROBEX-a od sudionika koji su bili samo jednom na natjecanju dok varijbla starosjedioci opisuje sudionike koji su bili više od jedanput.
 ```{r}
 spojeni_otp = aggregate(dionice$Prinos.iznad..OTP.indeksnog.fonda, by=list(dionice$Naziv.portfelja), FUN=mean)
 colnames(spojeni_otp) = c("ID", "otp")
@@ -310,41 +351,28 @@ starosjedioci = spojeni_otp[spojeni_otp$ID %in% more.than.2.times$Var1, ]
 length(gusteri$ID); length(starosjedioci$ID)
 ```
 
-Idemo malo proučit starosjedioce.
-Izgleda da nisu ništa posebno. Srednja vrijednost i medijan blago negativni opet.
+Uspoređivanje boxplotova guštera i starosjedioca.
+Na temelju boxplotova ne vidi se neka prevelika razlika osim što se uočava da je medijan starosjedioca malo iznad medijana guštera.
 
 ```{r}
-boxplot(starosjedioci$otp)
-```
-
-Većina ljudi(ekipa) sudjeluje samo jednom.
-
-```{r}
-hist(dionice_broj_sudejlovanja$Broj.sudjelovanja)
+boxplot(gusteri$otp, starosjedioci$otp, main="Pravokutni dijagram usporedbe neiskusnih i iskusnih sudionika")
 ```
 
 
-Summary
+Pokazuje se da su i medijan i srednja vrijednost prinosa iznad CROBEX-a viši kod onih koji su bili barem 2 puta na natjecanju.
+
 ```{r}
-summary(starosjedioci)
+summary(gusteri$otp); summary(starosjedioci$otp)
 ```
 
-Ide li starosjediocima bolje nego gušterima?
-
-Ako napravimo test s alternativnom hipotezom da starosjediocima ide bolje dobijemo p vrijednost od 13.3% i ne možemo odbaciti nultu hipotezu.
-95%-tni interval pouzdanosti je [-0.7461803  2.7013302] i sadrži nulu. Znači ima razlike među njima no ona nije dovoljno značajna da odbacimo hipotezu da su jednaki.
+Radimo t test s nultom hipotezom da su srednje vrijednosti prinosa iznad CROBEX-a iste kod starosjedioca i kod gustera te s alternativnom hipotezom da starosjediocima ide bolje.
+Dobivena je p vrijednost od 13.3% na temelju koje se ne može odbaciti nulta hipoteza uz razinu značajnosti od 5%. Ima razlike među njima no ona nije dovoljno značajna da odbacimo hipotezu da su jednaki.
 
 ```{r}
 t.test(starosjedioci$otp, gusteri$otp, alternative = "greater")
 ```
 
-```{r}
-t.test(starosjedioci$otp, gusteri$otp)
-```
-
-Možda je problem taj što smo starosjediocima uzimali srednju vrijednost njihovih pokušaja. Ajmo ić logikom da im ide sve bolje i bolje s iskustvom koje nakupljaju pa uze samo njihove zadnje pokušaje
-(možemo i najbolje koje imaju to tad već varamo navijajući za njih).
-
+Možda ako sudionicima koji su se pojavili više od jedanput na natjecanju spojimo rezultate uzimajući samo njihovu zadnju vrijednost, umjesto srednje vrijednosti pokušaja, dobijemo bolje rezultate. Pretpostavka koja nas navodi na ovako nešto je ta da sudionicima ide bolje i bolje s vremenom kako skupljaju iskustvo.
 ```{r}
 spojeni_otp_zadnja_vrijednost = aggregate(dionice$Prinos.iznad..OTP.indeksnog.fonda, by=list(dionice$Naziv.portfelja), FUN=function(x) tail(x, n=1)[1])
 colnames(spojeni_otp_zadnja_vrijednost) = c("ID", "otp")
@@ -353,43 +381,52 @@ starosjedioci_zadnja_vrijednost = spojeni_otp_zadnja_vrijednost[spojeni_otp_zadn
 length(gusteri$ID); length(starosjedioci_zadnja_vrijednost$ID)
 ```
 
-Nažalost ni tom im nije puno pomoglo. P vrijednost je 97% te alternativnu hipotezu da su starosjedioci bolji definitvno ne možemo shvatit ozbiljno.
+Napravljen je test srednje vrijednosti prinosa iznad CROBEX-a starosjedioca i gustera gdje su starosjediocima uzimali zadnje vrijednosti kao njihov rezultat. Alternatvina hipoteza je ta da starosjediocima ide bolje. 
+Dobivena je p vrijednost u iznosu od 97.3% te hipotezu da su starosjedioci bolji definitvno ne možemo shvatit ozbiljno. Da je tu napravljen test s alternativnom hipotezom koja govori da starosjediocima ide lošije onda bi se nulta hipoteza mogla odbaciti uz razinu značajnosti od 3%. Uspoređujući njihove srednje vrijednosti zaista je istina da su starosjedioci ispali lošiji u ovom novom scenariju. 
 
 ```{r}
 t.test(starosjedioci_zadnja_vrijednost$otp, gusteri$otp, alternative = "greater")
 ```
 
-
-Ide li tim ljudima bolje kroz godine?
-Nope.
+Pretpostavljeno je iznad da će sudionicima zadnja vrijednost na natjecanju biti bolja od srednje vrijednosti. T test te tvrdnje s alternativnom hipotezom da je zadnja vrijednost bolja od srednje vrijednosti je napravljen dole.
+Rezultat tog testa je p vrijednost od 99.57% te ne samo da se ne može odbaciti nulta hipoteza nego ispada da se sudionici nisu poboljšali kroz godine te bolje rezultate dobiju računajući srednju vrijednost od napravljenih rezultata.
 
 ```{r}
 t.test(starosjedioci_zadnja_vrijednost$otp, starosjedioci$otp, alternative = "greater")
 ```
 
 
-Postoji li korelacija između broja mijenjanja portfelja i frekvencije sudjelovanja na natjecanju? 
-To jest mijenjaju li starosjedioci češće portfelj. 
-Korelacija je 0.25. Nije jaka korelacija no starosjedioci ipak malo češće mijenjaju portfelj.
+###Postoji li korelacija između broja mijenjanja portfelja i broja sudjelovanja na natjecanju? 
+To jest mijenjaju li starosjedioci češće portfelj.
+Nekako je intuitivno za pretpostaviti da sudionici koji često dolaze na natjecanje često i mijenjaju svoj portfelj iskušavajući neke nove taktike.
+Dobivena korelacija između mijenjanja portfelja i frekvencije sudjelovanja je iznosa 0.14. Nije jaka korelacija, no starosjedioci ipak malo češće mijenjaju portfelj.
 
 ```{r}
 colnames(name.occurence) = c("Naziv.portfelja", "Broj.sudjelovanja")
-dionice_broj_sudejlovanja = merge(dionice, name.occurence, by="Naziv.portfelja")
-dionice_broj_sudejlovanja = dionice_broj_sudejlovanja[with(dionice_broj_sudejlovanja, order(Godina, -Prinos)), ]
+# dionice_broj_sudejlovanja = merge(dionice, name.occurence, by="Naziv.portfelja")
+# dionice_broj_sudejlovanja = dionice_broj_sudejlovanja[with(dionice_broj_sudejlovanja, order(Godina, -Prinos)), ]
 
-cor(dionice_broj_sudejlovanja$Broj.promjena, dionice_broj_sudejlovanja$Broj.sudjelovanja)
+broj_sudjelovanja_naziva = rep(0.0, length(name.occurence$Naziv.portfelja))
+names(broj_sudjelovanja_naziva) = name.occurence$Naziv.portfelja
+pom = c()
+for (naziv in dionice$Naziv.portfelja){
+  broj_sudjelovanja_naziva[naziv] = broj_sudjelovanja_naziva[naziv] + 1
+  pom = c(pom, broj_sudjelovanja_naziva[naziv])
+}
+dionice$Broj.Sudjelovanja = pom
+
+cor(dionice$Broj.Sudjelovanja, dionice$Broj.promjena)
 ```
 
-Šta je pak s korelacijom između broja sudjelovanja i prinosa.
-Ona je 0.049. 
-Možemo reć da ne postoji.
+
+Korelacija između prinosa iznad CROBEX-a i broja sudjelovanja na natjecanju je iznosa -0.0038 te je zanemariva.
 
 ```{r}
-cor(dionice_broj_sudejlovanja$Prinos.iznad..OTP.indeksnog.fonda, dionice_broj_sudejlovanja$Broj.sudjelovanja)
+cor(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.Sudjelovanja)
 ```
 
 
-Najčešće odabrana dionica
+Najčešće odabrana dionica te dionica koja ima najveću korelaciju s ostvarenim prihodom iznad crobexa je dionica naziva RIVP-R-A. To je dionica koja pripada kategoriji pod turizmi i hoteli. Duštvo koje stoji iza nje je VALAMAR RIVIERA D.D., te ako sam shvatio bave se upravljanjem turističkih mjesta poput hotela, kampova i ljetovališta. Korelacija te dionice iznosi 0.185 s prihodom iznad CROBEX-a te od 2234 sudionika kroz ovih 8 godina njih čak 623 je nju imalo u svojem portfelju.
 
 ```{r}
 # Prvo moramo parsirati stupac Dionice i dobiti listu stringova(factora) koji predstavljaju dionice
@@ -401,41 +438,29 @@ parser = function(string) {
 parser(dionice$Dionice[1])
 parser(factor(dionice$Dionice[1]))
 dionice$Lista.Dionica = lapply(dionice$Dionice, parser)
-dionice$Lista.Dionica[1]
-head(dionice)
-summary(dionice$Lista.Dionica)
+# dionice$Lista.Dionica[1]
+# head(dionice)
+# summary(dionice$Lista.Dionica)
 
-install.packages("XML")
-install.packages("RCurl")
-install.packages("qdapTools")
+# install.packages("XML")
+# install.packages("RCurl")
+# install.packages("qdapTools")
 
 library(qdapTools)
-dionice[1]
+# dionice[1]
 binary_dionice = cbind(dionice$RB, dionice$Naziv.portfelja, mtabulate(dionice$Lista.Dionica))
-binary_dionice
 
-help("colSums")
 # colSums(binary_dionice)
-binary_dionice[, -c(1,2)] # omitting first and second column
+# binary_dionice[, -c(1,2)] # omitting first and second column
 binary_samo_dionice = binary_dionice[, -c(1, 2)]
 
-colSums(binary_samo_dionice)
-sort(colSums(binary_samo_dionice), decreasing = T)
+sort(colSums(binary_samo_dionice), decreasing = T)[1]
 
+correlation_dionice_crobex = cor(binary_samo_dionice, dionice$Prinos.iznad..OTP.indeksnog.fonda)
+which(correlation_dionice_crobex == max(correlation_dionice_crobex), arr.ind = T)
+correlation_dionice_crobex[101, 1]
 ```
 
-
-parsiraj odabrane dionice pa koja je najbolja za imat
-mjesec izrade računa ovisi li o nečemu 
-
-
-
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 
 
 
