@@ -162,7 +162,7 @@ boxplot(otp, main="Pravokutni dijagram prihoda iznad CROBEX-a svih godina zajedn
 
 # Testiranje srednje vrijednosti prihoda iznad CROBEX-a
 
-Provodi se t test s nul hipotezom da je srednja vrijednost jednaka nuli, s alternativom da nije jednaka nuli.
+Provodi se t test s nultom hipotezom da je srednja vrijednost jednaka nuli, s alternativom da nije jednaka nuli.
 Koristeći pogrešku prve vrste (alphu) od 5% te na temelju dobivene p vrijednosti od 0.58% možemo odbaciti null hipotezu.
 Gledajući 95%-tni interval pouzdanosti koji ide od [-2.0, -0.33] možemo vidjeti da nula definitivno nije unutar te da je srednja vrijednost prihoda populacije negativna. 
 Naslućuje se kako pojedinci generalno gube a tržište pobjeđuje.
@@ -173,7 +173,7 @@ t.test(otp, mu=0, alternative = "two.sided")
 
 Drugi test koji se provodi nad podacima je na medijanima prihoda iznad CROBEX-a kroz godine. 
 
-Testira se nul hipoteza koja govori da je srednja vrijednost medijana jednaka nuli uz alternativnu hipotezu da je srednja vrijednost medijana različita od nule.
+Testira se nulta hipoteza koja govori da je srednja vrijednost medijana jednaka nuli uz alternativnu hipotezu da je srednja vrijednost medijana različita od nule.
 Dobivena p-vrijednost je 35% te se ne može odbaciti nulta hipoteza čak ni uz osjetno veće alphe od 5%, 95-postotni interval pouzdanosti je između -5 i 2 te naginje negativnom iznosu, također srednja vrijednost medijana kroz godine je negativan broj iznosa -1.5.
 
 
