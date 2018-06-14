@@ -7,13 +7,13 @@ output:
   html_notebook: default
 ---
 
-Zadatak je provjeriti ispravnost hipoteze ekiasnih tržišta koja tvrdi da je nemoguće "pobijediti tržište". Varijabla promatranja je prinos u odnosu na CROBEX.
+Zadatak je provjeriti ispravnost hipoteze efikasnih tržišta koja tvrdi da je nemoguće "pobijediti tržište". Varijabla promatranja je prinos u odnosu na CROBEX.
 
-Većina analize će se provoditi nad spojenim podacima od 2009. godine do 2017. godine. Njihovim spajanjem te promatranjem varijable prinos iznad CROBEXA pretpostavlja se nezavisnost između godina. Ta tvrdnja nije istinita jer će se kasnije pokazati da ima puno ekipa koje su sudjelovale kroz nekoliko godina natjecanja te samim time je njihov noviji rezultat zavisan o prethodnim pokušajima. Također, pretpostavka da su uvjeti bili jednaki svake godine je isto vrlo vjerovatno prekršena. Usprkos svemu tome, rezultat analize ne bi bio puno drugačiji da gornje tvrdnje nisu prekršene.  
+Većina analize će se provoditi nad spojenim podacima od 2009. godine do 2017. godine. Njihovim spajanjem te promatranjem varijable prinos iznad CROBEXA pretpostavlja se nezavisnost između godina. Ta tvrdnja nije istinita jer će se kasnije pokazati da ima puno ekipa koje su sudjelovale kroz nekoliko godina natjecanja te samim time je njihov noviji rezultat zavisan o prethodnim pokušajima. Također, pretpostavka da su uvjeti bili jednaki svake godine je isto vrlo vjerojatno prekršena. Usprkos svemu tome, rezultat analize ne bi bio puno drugačiji da gornje tvrdnje nisu prekršene.  
 
 
-Donji kod učitava podatke iz svih datoteka te dodaje stupac koji govori o kojoj se godini radi. Miču se prazni reci te se svi stupci koji sadrže postotak pretvaraju u double. Znak posto je maknut te broj koji se sada nalazi u tom stupcu označava postotak. Tipa ako piše 10 to onda znači 10 posto.
-Kolumna koja sadrži godine je potom pretovrena u factor, tj kategorijski podatak. Takav dataset je spremljen u file dionice.Rdata te ga se lako može učitati iz memorije kasnije.
+Donji kod učitava podatke iz svih datoteka te dodaje stupac koji govori o kojoj se godini radi. Miču se prazni reci te se svi stupci koji sadrže postotak pretvaraju u double. Znak % je maknut te broj koji se sada nalazi u tom stupcu označava postotak. Na primjer brojka 10 označava 10%.
+Kolumna koja sadrži godine je potom pretvorena u factor, tj kategorijski podatak. Takav dataset je spremljen u file dionice.Rdata te ga se lako može učitati iz memorije kasnije.
 
 ```{r}
 # dionice.2009 = read.csv("podaci/mojedionice2009.csv", header = T, sep = ",")
@@ -94,20 +94,20 @@ load("dionice.Rdata")
 
 # Deskriptivna statistika.
 
-Uspoređujući mediane i srednje vrijednosti tokom godina uočava se veliko odstupanje između samih godina te se polako naslućuje da prinos iznad CROBEXA gleano sveukupno naginje prema negativnoj vrijednosti.
+Uspoređujući medijane i srednje vrijednosti tokom godina uočava se veliko odstupanje između samih godina te se polako naslućuje da prinos iznad CROBEXA gledano sveukupno naginje prema negativnoj vrijednosti.
 
 ```{r}
 tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Godina, summary)
 ```
 
-Dole je prikazan graf srednje vrijednosti prinosa iznad CROBEXA kroz godine. Većina srednjih vrijednosti se nalazi u blagome minusu uz izuzetak 2016. godine kada je srednja vrijednost na skoro 8 posto u plusu, 2010. godina je pak u minusu od 8%.
+Ispod je prikazan graf srednje vrijednosti prinosa iznad CROBEXA kroz godine. Većina srednjih vrijednosti se nalazi u blagome minusu uz izuzetak 2016. godine kada je srednja vrijednost na skoro 8 posto u plusu, 2010. godina je pak u minusu od 8%.
 
 ```{r}
 mean.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), mean)
 plot(mean.by.year, ylab="Srednja vrijednost prinosa iznad CROBEX-a", xlab="Godina")
 ```
 
-Dole je prikazan graf medijana kroz godine. Većina medijana se također nalazi u blagome minusu no zanimljivo je da se najveći medijan ovog puta nalazi u 2012. godini (najveća srednja vrijednost je bila 2016. godine). Medijan za 2012. godinu iznosi 5.63% dok srednja vrijednost za 2012. godinu iznosi 3.1%, 2010. godina je i dalje u velikom minusu i to skoro za 9% ovaj puta.
+Na sljedećem grafu je prikazan medijan kroz godine. Većina medijana poprima male negativne vrijednosti, a zanimljivo je da se najveći medijan ovog puta nalazi u 2012. godini (najveća srednja vrijednost je bila 2016. godine). Medijan za 2012. godinu iznosi 5.63% dok srednja vrijednost za 2012. godinu iznosi 3.1%, 2010. godina je i dalje u velikom minusu i to skoro za 9% ovaj puta.
 
 
 ```{r}
@@ -115,10 +115,10 @@ median.by.year = aggregate(dionice[, c(7)], list(dionice$Godina), median)
 plot(median.by.year, ylab="Medijan prinosa iznad CROBEX-a", xlab="Godina")
 ```
 
-Dvije generalne tvrdnje koje se mogu konstatirati u ovom trenutku su te da je 2010. godina bila najbolja godina za tržište dok su 2012. i 2016. godina bile najgore godine za tržište.
+Generalne tvrdnje koje se mogu konstatirati u ovom trenutku su da je 2010. godina bila najbolja godina za tržište dok su 2012. i 2016. godina bile najgore godine za tržište.
 
-Dole je pak prikaz Boxplotova za svaku od godina.
-Uočava se stršeća pozitivnu vrijednost u 2013 godini. Neko je tad naime, bio 131% u plusu u prihodu iznad CROBEX indexa.
+Ispod se nalazi prikaz Boxplotova za svaku godinu.
+Uočava se stršeća pozitivnu vrijednost u 2013 godini. U 2013. godini netko  je  imao prihod 131% iznad CROBEX indexa.
 
 ```{r}
 require(ggplot2, quietly = T)
@@ -129,7 +129,7 @@ ggtitle("Boxplot prikaz prinosa iznad CROBEX-a po godinama")
 
 
 Proučavanje ima li varijabla prinos iznad CROBEX-a normalnu distribucije.
-Na temelju histograma i kvantil-kvantil prikaza možemo pretpostaviti da se zaista radi o normalnoj distribuciji makar na kvantil-kvantil prikazu vidimo odstupanja u lijevom i desnom repu zbog kojih možemo posumnjati.
+Na temelju histograma i kvantil-kvantil prikaza možemo pretpostaviti da se zaista radi o normalnoj distribuciji iako na kvantil-kvantil prikazu vidimo odstupanja u lijevom i desnom repu zbog kojih možemo posumnjati da se radi o normalnoj distribuciji.
 
 ```{r}
 hist(dionice$Prinos.iznad..OTP.indeksnog.fonda, main=NULL, xlab = "Prihod iznad CROBEX-a", ylab = "Frekvencija")
@@ -140,8 +140,8 @@ qqline(dionice$Prinos.iznad..OTP.indeksnog.fonda)
 ```
 
 
-Medijan promatran kroz sve godine prihoda iznad CROBEX-a je -0.605 dok je srednja vrijednost -1.171. Oboje su negativni što daje naslutiti da tržište pobjeđuje.
-Najlošiji postotak ostvaren tokom svih godina je onaj od -84% dok je najbolji u plusu za 131%.
+Medijan promatran kroz sve godine prihoda iznad CROBEX-a je -0.605 dok je srednja vrijednost -1.171. Oboje su negativni iz  čega zaključujemo da tržište pobjeđuje.
+Najlošiji postotak ostvaren tokom godina je onaj od -84% dok je najbolji u plusu za 131%.
 
 ```{r}
 summary(dionice$Prinos.iznad..OTP.indeksnog.fonda)
@@ -154,7 +154,7 @@ otp = dionice$Prinos.iznad..OTP.indeksnog.fonda
 mean(otp, trim=0.2)
 ```
 
-Dole se nalazi boxplot prikaz svih zajedno godina ostvarenog prihoda iznad CROBEX-a.
+Dole se nalazi boxplot prikaz iznad CROBEX-a od svih godina zajedno.
 
 ```{r}
 boxplot(otp, main="Pravokutni dijagram prihoda iznad CROBEX-a svih godina zajedno.")
@@ -162,9 +162,9 @@ boxplot(otp, main="Pravokutni dijagram prihoda iznad CROBEX-a svih godina zajedn
 
 # Testiranje srednje vrijednosti prihoda iznad CROBEX-a
 
-Provodi se t test s null hipotezom da je srednja vrijednost jednaka nuli, s alternativom da nije jednaka nuli.
+Provodi se t test s nul hipotezom da je srednja vrijednost jednaka nuli, s alternativom da nije jednaka nuli.
 Koristeći pogrešku prve vrste (alphu) od 5% te na temelju dobivene p vrijednosti od 0.58% možemo odbaciti null hipotezu.
-Gledajući 95%-tni interval pouzdanosti koji ide od [-2.0, -0.33] možemo vidjet da nula definitvno nije unutra te da je srednja vrijednost prihoda populacije negativna. 
+Gledajući 95%-tni interval pouzdanosti koji ide od [-2.0, -0.33] možemo vidjeti da nula definitivno nije unutar te da je srednja vrijednost prihoda populacije negativna. 
 Naslućuje se kako pojedinci generalno gube a tržište pobjeđuje.
 
 ```{r}
@@ -173,7 +173,7 @@ t.test(otp, mu=0, alternative = "two.sided")
 
 Drugi test koji se provodi nad podacima je na medijanima prihoda iznad CROBEX-a kroz godine. 
 
-Testira se null hipozeta koja govori da je srednja vrijednost medijana jednaka nuli uz alternativnu hipotezu da je srednja vrijednost medijana različita od nule.
+Testira se nul hipoteza koja govori da je srednja vrijednost medijana jednaka nuli uz alternativnu hipotezu da je srednja vrijednost medijana različita od nule.
 Dobivena p-vrijednost je 35% te se ne može odbaciti nulta hipoteza čak ni uz osjetno veće alphe od 5%, 95-postotni interval pouzdanosti je između -5 i 2 te naginje negativnom iznosu, također srednja vrijednost medijana kroz godine je negativan broj iznosa -1.5.
 
 
@@ -214,7 +214,7 @@ dionice$Broj.promjena = unlist(lapply(dionice$Broj.promjena, parser))
 # save(dionice, file = "dionice.Rdata")
 ```
 
-Većina natjecatelja nije sklono mijenjanju portfelja te je to prikazano histogramom dolje.
+Većina natjecatelja nije sklono mijenjanju portfelja što je prikazano histogramom ispod.
 
 ```{r}
 hist(dionice$Broj.promjena, main=NULL, xlab = "Broj promjena portfelja", ylab = "Frekvencija", breaks = seq(from = min(dionice$Broj.promjena) - 0.5, to = max(dionice$Broj.promjena) + 0.5, by = 1), xaxt='n')
@@ -249,7 +249,7 @@ Slika srednje vrijednosti po broju promjena prihoda iznad CROBEX-a otkriva zanim
 plot(tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, mean), xlab = "Broj promjena portfelja", ylab = "Srednja vrijednost prihoda iznad CROBEX-a")
 ```
 
-Ukazuje se na činjenicu da makar srednja vrijednost rasla s brojem promjena to ne znači puno jer je situacija takva da je većina podataka grupirana na malom broju promjena portfelja. Čak 87.7% sudionika je mijenjalo portfelj manje od 3 puta.
+Ukazuje se na činjenicu da iako je srednja vrijednost rasla s brojem promjena to ne znači puno jer je većina podataka grupirana na malom broju promjena portfelja. Čak 87.7% sudionika je mijenjalo portfelj manje od 3 puta.
 ```{r}
 tapply(dionice$Prinos.iznad..OTP.indeksnog.fonda, dionice$Broj.promjena, length)
 ```
@@ -328,7 +328,7 @@ U 2234 podataka ima samo 1347 jedinstevnih igrača te od tih 1347 ima 430 igrač
 length(name.occurence$Var1); length(more.than.2.times$Var1); length(name.occurence$Var1) - length(more.than.2.times$Var1);
 ```
 
-Na temlju histograma broja sudjelovanja uočava se činjenica da velika većina natjecatelja sudjeluje relativno malen broj puta no čak njih 7 je sudjelovalo kroz sve godine trajanja natjecanja.
+Na temlju histograma broja sudjelovanja uočava se da velika većina natjecatelja sudjeluje malen broj puta no čak njih 7 je sudjelovalo kroz sve godine trajanja natjecanja.
 
 ```{r}
 colnames(name.occurence) = c('Naziv.portfelja', 'Broj.sudjelovanja')
@@ -341,7 +341,7 @@ axis(side=1, at=seq(min(name.occurence$Broj.sudjelovanja), max(name.occurence$Br
 ### Donosi li iskustvo prednost?
 
 Za one koji imaju više sudjelovanja je prinos iznad CROBEX-a sveden na srednju vrijednost svih njihovih sudjelovanja.
-Dole u varijabli gusteri je spremljen prinos iznad CROBEX-a od sudionika koji su bili samo jednom na natjecanju dok varijbla starosjedioci opisuje sudionike koji su bili više od jedanput.
+Dole u varijabli gusteri je spremljen prinos iznad CROBEX-a od sudionika koji su bili samo jednom na natjecanju dok varijabla starosjedioci opisuje sudionike koji su bili više od jedanput.
 ```{r}
 spojeni_otp = aggregate(dionice$Prinos.iznad..OTP.indeksnog.fonda, by=list(dionice$Naziv.portfelja), FUN=mean)
 colnames(spojeni_otp) = c("ID", "otp")
@@ -352,7 +352,7 @@ length(gusteri$ID); length(starosjedioci$ID)
 ```
 
 Uspoređivanje boxplotova guštera i starosjedioca.
-Na temelju boxplotova ne vidi se neka prevelika razlika osim što se uočava da je medijan starosjedioca malo iznad medijana guštera.
+Na temelju boxplotova ne vidi se prevelika razlika osim da je medijan starosjedioca malo iznad medijana guštera.
 
 ```{r}
 boxplot(gusteri$otp, starosjedioci$otp, main="Pravokutni dijagram usporedbe neiskusnih i iskusnih sudionika")
@@ -372,7 +372,7 @@ Dobivena je p vrijednost od 13.3% na temelju koje se ne može odbaciti nulta hip
 t.test(starosjedioci$otp, gusteri$otp, alternative = "greater")
 ```
 
-Možda ako sudionicima koji su se pojavili više od jedanput na natjecanju spojimo rezultate uzimajući samo njihovu zadnju vrijednost, umjesto srednje vrijednosti pokušaja, dobijemo bolje rezultate. Pretpostavka koja nas navodi na ovako nešto je ta da sudionicima ide bolje i bolje s vremenom kako skupljaju iskustvo.
+Možda ako sudionicima koji su se pojavili više od jedanput na natjecanju spojimo rezultate uzimajući samo njihovu zadnju vrijednost, umjesto srednje vrijednosti pokušaja, dobijemo bolje rezultate. Pretpostavka koja nas navodi na ovako nešto je  da sudionicima ide sve bolje jer skupljaju iskustvo.
 ```{r}
 spojeni_otp_zadnja_vrijednost = aggregate(dionice$Prinos.iznad..OTP.indeksnog.fonda, by=list(dionice$Naziv.portfelja), FUN=function(x) tail(x, n=1)[1])
 colnames(spojeni_otp_zadnja_vrijednost) = c("ID", "otp")
