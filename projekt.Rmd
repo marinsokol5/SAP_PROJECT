@@ -453,7 +453,7 @@ binary_dionice = cbind(dionice$RB, dionice$Naziv.portfelja, mtabulate(dionice$Li
 # colSums(binary_dionice)
 # binary_dionice[, -c(1,2)] # omitting first and second column
 binary_samo_dionice = binary_dionice[, -c(1, 2)]
-
+dionice_popularnost = data.frame(sort(colSums(binary_samo_dionice), decreasing = T))
 sort(colSums(binary_samo_dionice), decreasing = T)[1]
 
 correlation_dionice_crobex = cor(binary_samo_dionice, dionice$Prinos.iznad..OTP.indeksnog.fonda)
@@ -461,6 +461,54 @@ which(correlation_dionice_crobex == max(correlation_dionice_crobex), arr.ind = T
 correlation_dionice_crobex[101, 1]
 ```
 
+### Postoji li povezanost popularnosti dionice i njene korelacije s prinosom iznad CROBEX-a?
+Dijagram raspršenja koji na x-osi ima broj portfelja koji su tokom godina sadržavali određenu dionicežu dok y-os prikazuje korelaciju te dionice s prihodom iznad CROBEX-a je prikazan ispod.
 
+```{r}
+popularnost.korelacija = merge(dionice_popularnost, correlation_dionice_crobex, by=0)
+colnames(popularnost.korelacija) = c("Dionica", "Popularnost","Korelacija.CROBEX")
+plot(popularnost.korelacija$Popularnost, popularnost.korelacija$Korelacija.CROBEX, xlab = "Broj portfelja s tom dionicom", ylab = "Korelacija dionice s prinosom iznad CROBEX-a")
+```
+
+Postoji li korelacija te dvije varijable?
+Nažalost, značajna korelacija ne postoji.
+
+```{r}
+cor(popularnost.korelacija$Popularnost, popularnost.korelacija$Korelacija.CROBEX)
+```
+
+# EXTRA LR
+
+```{r}
+pom = binary_samo_dionice
+pom$crobex = dionice$Prinos.iznad..OTP.indeksnog.fonda
+model = lm(crobex ~ ., data = pom)
+# summary(model)
+```
+
+
+# ANOVA
+
+Bartlett test je test homogenosti varijanci (test jednakosti varijanci različitih populacija) koji prethodi ANOVI jer je jedna od pretpostavki ANOVE jednakost varijanci.
+Dobivena je jako malan p-vrijednost te je nulta hipoteza (da su varijance tih populacija jednake) odbačena.
+
+ANOVA se ne može raditi.
+ANOVA testira srednje vrijednosti između više populacija te je idealna za naše podatke gdje je svaka godina trajanja natjecanja jedna populacija. 
+Radila bi se jednofaktorska ANOVA gdje bi faktor bio godina natjecanja i imao bi 8 razina (od 2009. do 2017.).
+Šteta.
+
+```{r}
+# boxplot(dionice$Prinos.iznad..OTP.indeksnog.fonda ~ dionice$Godina)
+bartlett.test(dionice$Prinos.iznad..OTP.indeksnog.fonda ~ dionice$Godina)
+# model = lm(dionice$Prinos.iznad..OTP.indeksnog.fonda ~ dionice$Godina)
+# anova(model)
+```
+
+# E da
+https://novac.jutarnji.hr/makro-mikro/valamar-ce-ove-godine-zaposliti-6600-djelatnika-minimalna-neto-placa-je-5000-kuna/7470261/
+
+# Zaključak
+
+Nakon promatranja prinosa iznad CROBEX-a nad podacima s natjecanja na stranici MojeDionice (https://www.mojedionice.com/) donesen je zaključak kako pojedinci generalno ne pobjeđuju tržište. Mnogi natjecatelji su bili u velikom plusu no kad ih promatramo sve zajedno kao cjelinu onda vidimo da su oni zajedno u blagome minusu. Promatrane su neke varijable za koje smo se nadali da mogu objasniti iznos prinosa iznad CROBEX-a no na temelju danih podataka nije pronađena nijedna značajna zavisnost.  
 
 
